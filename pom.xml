@@ -5,7 +5,7 @@
 
 	<groupId>org.ayokas</groupId>
 	<artifactId>cloudflare-dnsupdate-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 
 	<name>Cloudflare DNS-Update Service</name>
