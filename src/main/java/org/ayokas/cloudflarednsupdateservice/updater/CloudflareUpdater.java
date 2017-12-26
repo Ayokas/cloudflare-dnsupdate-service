@@ -2,6 +2,7 @@ package org.ayokas.cloudflarednsupdateservice.updater;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ayokas.cloudflarednsupdateservice.CloudflareErrorException;
 import org.ayokas.cloudflarednsupdateservice.CloudflareProperties;
 
 import java.io.BufferedReader;
@@ -14,11 +15,15 @@ import java.net.URL;
 public class CloudflareUpdater {
     private static final Logger log = LogManager.getLogger(CloudflareUpdater.class);
 
-    public static String updateARecord(String address, String domain, String email, String apiKey) {
+    public static String updateARecord(String address, String domain, String email, String apiKey) throws IOException, CloudflareErrorException {
         try {
             String baseUrl = CloudflareProperties.getApibaseurl();
             String zone = CloudflareProperties.getZone();
             String record = CloudflareProperties.getRecord();
+
+            if (baseUrl.isEmpty() || zone.isEmpty() || record.isEmpty()) {
+                throw new CloudflareErrorException("Cloudflare baseUrl, zone or record-id not set in application.properties!");
+            }
 
             URL url = new URL(String.format("%s/zones/%s/dns_records/%s", baseUrl, zone, record));
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -32,10 +37,7 @@ public class CloudflareUpdater {
             os.write(requestBody.getBytes());
             os.flush();
 
-            if (conn.getResponseCode() != 200) {
-                log.error("Cloudflare responses with HTTP error code: " + conn.getResponseCode() + " - " + conn.getResponseMessage());
-                return "Cloudflare responses with HTTP error code : " + conn.getResponseCode() + " - " + conn.getResponseMessage();
-            }
+
 
             BufferedReader br = new BufferedReader(new InputStreamReader(
                     (conn.getInputStream())));
@@ -49,10 +51,17 @@ public class CloudflareUpdater {
             }
 
             conn.disconnect();
-            return responseStringBuilder.toString();
+
+            // Get response body either for successful response or error analysis
+            if (conn.getResponseCode() != 200) {
+                log.error(String.format("Cloudflare responses with HTTP error code: %d - %s - %s", conn.getResponseCode(), conn.getResponseMessage(), responseStringBuilder.toString()));
+                throw new CloudflareErrorException(responseStringBuilder.toString());
+            } else {
+                return responseStringBuilder.toString();
+            }
         } catch (IOException e) {
             log.error(e);
-            return e.getMessage();
+            throw e;
         }
     }
 }

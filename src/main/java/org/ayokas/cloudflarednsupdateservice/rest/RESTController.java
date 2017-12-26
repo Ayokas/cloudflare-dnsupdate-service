@@ -2,6 +2,7 @@ package org.ayokas.cloudflarednsupdateservice.rest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ayokas.cloudflarednsupdateservice.CloudflareErrorException;
 import org.ayokas.cloudflarednsupdateservice.updater.CloudflareUpdater;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Base64;
 
@@ -36,7 +38,14 @@ public class RESTController {
 
             email = credentials.split(":", 2)[0];
             apiKey = credentials.split(":", 2)[1];
-            String response = CloudflareUpdater.updateARecord(address, domain, email, apiKey);
+            String response;
+            try {
+                response = CloudflareUpdater.updateARecord(address, domain, email, apiKey);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Please contact your administrator - IOException on updateARecord");
+            } catch (CloudflareErrorException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Cloudflare responded with at errors: %s", e.getMessage()));
+            }
 
             // Return Cloudflare response message as JSON
             logger.info("Update successful!");
