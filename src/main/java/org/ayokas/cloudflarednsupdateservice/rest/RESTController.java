@@ -12,43 +12,39 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Base64;
 
 @RestController
 public class RESTController {
     private static final Logger logger = LogManager.getLogger(RESTController.class);
 
-    @RequestMapping("/rest/update/a")
+    @RequestMapping("/update")
     public ResponseEntity getExecuteARecordUpdate(
-            @RequestParam(value = "address", defaultValue = "") String address,
-            @RequestParam(value = "domain", defaultValue = "") String domain,
+            @RequestParam(value = "zone", defaultValue = "") String zone,
+            @RequestParam(value = "record", defaultValue = "") String record,
+            @RequestParam(value = "type", defaultValue = "AAAA") String type,
+            @RequestParam(value = "name", defaultValue = "") String name,
+            @RequestParam(value = "content", defaultValue = "") String content,
+            @RequestParam(value = "ttl", defaultValue = "0") String ttl,
+            @RequestParam(value = "proxied", required = false) Boolean proxied,
             HttpServletRequest request) {
 
-        logger.info(String.format("New IPv4 update GET request from '%s' with update address '%s'", request.getRemoteAddr(), address));
+        logger.info(String.format("New DNS record update, type: %s", type));
 
-        // Get Credentials from Basic Authentication
-        String email;
-        String apiKey;
-
+        // Check if credentials are available and update record
         String basicAuth = request.getHeader("Authorization");
         if (basicAuth != null && basicAuth.startsWith("Basic")) {
-            String base64Creds = basicAuth.substring("Basic".length()).trim();
-            String credentials = new String(Base64.getDecoder().decode(base64Creds), Charset.forName("UTF-8"));
-
-            email = credentials.split(":", 2)[0];
-            apiKey = credentials.split(":", 2)[1];
             String response;
             try {
-                response = CloudflareUpdater.updateARecord(address, domain, email, apiKey);
+                int iTtl = Integer.parseInt(ttl);
+                response = CloudflareUpdater.updateRecord(zone, record, type, name, content, basicAuth, iTtl, proxied);
             } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Please contact your administrator - IOException on updateARecord");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Please contact your administrator - IOException on updateRecord");
             } catch (CloudflareErrorException e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(String.format("Cloudflare responded with at errors: %s", e.getMessage()));
             }
 
             // Return Cloudflare response message as JSON
-            logger.info("Update successful!");
+            logger.info("DNS update successful!");
             return ResponseEntity.ok(response);
 
         } else {
