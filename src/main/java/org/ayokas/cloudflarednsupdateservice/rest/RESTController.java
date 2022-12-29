@@ -3,7 +3,9 @@ package org.ayokas.cloudflarednsupdateservice.rest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ayokas.cloudflarednsupdateservice.CloudflareErrorException;
+import org.ayokas.cloudflarednsupdateservice.CloudflareProperties;
 import org.ayokas.cloudflarednsupdateservice.updater.CloudflareUpdater;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,11 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @RestController
 public class RESTController {
+
+    @Autowired
+    private CloudflareProperties cloudflareProperties;
+
     private static final Logger logger = LogManager.getLogger(RESTController.class);
 
     @RequestMapping("/rest/update/a")
@@ -34,13 +40,13 @@ public class RESTController {
         String basicAuth = request.getHeader("Authorization");
         if (basicAuth != null && basicAuth.startsWith("Basic")) {
             String base64Creds = basicAuth.substring("Basic".length()).trim();
-            String credentials = new String(Base64.getDecoder().decode(base64Creds), Charset.forName("UTF-8"));
+            String credentials = new String(Base64.getDecoder().decode(base64Creds), StandardCharsets.UTF_8);
 
             email = credentials.split(":", 2)[0];
             apiKey = credentials.split(":", 2)[1];
             String response;
             try {
-                response = CloudflareUpdater.updateARecord(address, domain, email, apiKey);
+                response = CloudflareUpdater.updateARecord(cloudflareProperties, address, domain, email, apiKey);
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Please contact your administrator - IOException on updateARecord");
             } catch (CloudflareErrorException e) {

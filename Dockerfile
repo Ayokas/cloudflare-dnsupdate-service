@@ -26,7 +26,8 @@ ENV JARPATH=${RUNDIR}/app.jar
 COPY --from=build /usr/app/target/cloudflare-dnsupdate-service-${VERSION}.jar ${JARPATH}
 COPY --from=build /usr/app/src/main/resources/application.properties /spring-config/application.properties
 
-ENV SPRING_CONFIG_NAME=application
+ENV spring.config.location="/spring-config/"
+ENV spring.config.name="application.properties"
 
 WORKDIR "/spring-config"
 ENTRYPOINT [ "java", "-jar", "/spring-app/app.jar" ]

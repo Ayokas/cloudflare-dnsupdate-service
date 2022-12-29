@@ -1,38 +1,29 @@
 package org.ayokas.cloudflarednsupdateservice;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 @ConfigurationProperties("cloudflare")
+@Component
 public class CloudflareProperties {
 
-    private static String zone = "";
-    private static String record = "";
-    private static String apibaseurl = "";
+    private String zone = "";
+    private String record = "";
+    private String apibaseurl = "";
 
     public CloudflareProperties() {
     }
 
-    public static String getZone() {
+    public String getZone() {
         return zone;
     }
 
-    public static void setZone(String zone) {
-        CloudflareProperties.zone = zone;
-    }
-
-    public static String getRecord() {
+    public String getRecord() {
         return record;
     }
 
-    public static void setRecord(String record) {
-        CloudflareProperties.record = record;
-    }
-
-    public static String getApibaseurl() {
+    public String getApibaseurl() {
         return apibaseurl;
     }
 
-    public static void setApibaseurl(String apibaseurl) {
-        CloudflareProperties.apibaseurl = apibaseurl;
-    }
 }

@@ -5,11 +5,11 @@
 
     <groupId>org.ayokas</groupId>
     <artifactId>cloudflare-dnsupdate-service</artifactId>
-    <version>1.2</version>
+    <version>1.3</version>
     <packaging>jar</packaging>
 
     <name>Cloudflare DNS-Update Service</name>
-    <description>Serves a HTTP(S) endpoint to update cloudflare DNS-Records</description>
+    <description>Serves an HTTP(S) endpoint to update cloudflare DNS-Records</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

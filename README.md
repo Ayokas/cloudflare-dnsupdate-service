@@ -23,5 +23,6 @@ The update request is based upon the Fritz!Box request from AVM. So your update 
 To authenticate yourself at Cloudflare, you need to send your registered e-mail address and Cloudflare API-Key as Basic-Authentication. Use your e-mail as user and your api-key as password.
 [Read here how you get your Cloudflare API-Key](https://api.cloudflare.com/).
 
+If you want to use an Cloudflare API-Token set as User `cloudlfare-token` and as password the API-Token. For API-Tokens check [Cloudflare User Profile 'API-Tokens' page](https://dash.cloudflare.com/profile/api-tokens).
 ## Issues and requests
 Feel free to [submit issues and requests](https://github.com/Ayokas/cloudflare-dnsupdate-service/issues). However, keep in mind that I develop this in my spare time.
